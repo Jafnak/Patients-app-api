@@ -2,6 +2,7 @@ const express = require("express")
 const cors = require("cors")
 const mongoose = require("mongoose")
 const bcrypt = require("bcrypt")
+const jwt = require("jsonwebtoken")
 const loginModel = require("./models/admin")
 const app = express()
 app.use(cors())
@@ -22,6 +23,32 @@ app.post("/adminsignUp",(req,res)=>{
    let result=new loginModel(input)
     result.save()    //mongokk save cheyyan
     res.json({"status":"success"})
+})
+
+app.post("/adminSignin",(req,res)=>{
+    let input = req.body
+    let result = loginModel.find({username:input.username}).then(
+        (response)=>{
+            if (response.length>0) {
+                const validator=bcrypt.compareSync(input.password,response[0].password)
+                if (validator) {
+                    jwt.sign({email:input.username},"patient-app",{expiresIn:"1d"},
+                        (error,token)=>{
+                            if (error) {
+                                res.json({"status":"Token credentials failed"})
+                            } else {
+                                res.json({"status":"success","token":token})
+                            }
+                        })
+                    
+                } else {
+                    res.json({"status":"Wrong password"})
+                }
+            } else {
+                res.json({"status":"username doesn't exists"})
+            }
+        }
+    ).catch()
 })
 
 app.listen(8080,()=>{
