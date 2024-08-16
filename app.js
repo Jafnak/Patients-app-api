@@ -5,6 +5,7 @@ const bcrypt = require("bcrypt")
 const jwt = require("jsonwebtoken")
 const loginModel = require("./models/admin")
 const doctorModel = require("./models/doctor")
+const patientModel = require("./models/patient")
 const app = express()
 app.use(cors())
 app.use(express.json())
@@ -65,6 +66,24 @@ app.post("/addDoctor",(req,res)=>{
             res.json({"status":"invalid authentication"})
         }
     })
+})
+
+app.post("/addPatient",(req,res)=>{
+    let input = req.body
+    const dateObject = new Date()
+    const currentYear = dateObject.getFullYear()
+    //console.log(currentYear.toString())
+    const currentMonth = dateObject.getMonth()+1
+    //console.log(currentMonth.toString())
+    const randomNumber = Math.floor(Math.random()*9999)+1000
+    //console.log(randomNumber.toString())
+    const patientid = "XYZ"+currentYear.toString()+currentMonth.toString()+randomNumber.toString()
+    console.log(patientid)
+    input.patientid = patientid
+    console.log(input)
+    let result = new patientModel(input)
+    result.save()
+    res.json({"status":"success"})
 })
 
 app.listen(8080,()=>{
